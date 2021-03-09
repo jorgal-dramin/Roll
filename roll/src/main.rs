@@ -1,3 +1,11 @@
+mod dice;
+
+use dice::Dice;
+use dice::Rollable;
+
 fn main() {
-    println!("Hello, world!");
+    match Dice::new(&vec![1, 2, 3, 4, 5, 6]) {
+        Ok(mut dice) => println!("{}", dice.roll()),
+        Err(msg) => println!("{}", msg)
+    }
 }
