@@ -43,8 +43,11 @@ impl TryFrom<&str> for Dice<u16> {
         }?;
 
         let sides: u16  = formula[1..].parse::<u16>().or(Err(format!("'{}' is not a valid dice formula: Number not parsable", formula)))?;
-
-        let sides_vec = (min_value..(sides + min_value)).collect(); // upper bound is exclusive
-        Dice::new(sides_vec)
+        if sides == 0 {
+            Err(format!("'{}' is not a valid dice formula: Number must be greater than 0", formula))
+        } else {
+            let sides_vec = (min_value..(sides + min_value)).collect(); // upper bound is exclusive
+            Dice::new(sides_vec)
+        }
     }
 }
