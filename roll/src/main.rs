@@ -16,7 +16,7 @@ fn main() {
         Err(msg) => println!("{}", msg)
     }
 /*
-    match Dice::new(vec![1, 2, 3, 4, 5, 6]) {
+    match Dice::new(&vec![1, 2, 3, 4, 5, 6]) {
         Ok(mut dice) => println!("{}", dice.roll()),
         Err(msg) => println!("{}", msg)
     }
