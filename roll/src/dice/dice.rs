@@ -32,10 +32,10 @@ impl <'v, A: Clone> Rollable<'v, A> for Dice<A> {
     }
 }
 
-impl <'v> TryFrom<&'v str> for Dice<u16> {
+impl TryFrom<&str> for Dice<u16> {
     type Error = String;
 
-    fn try_from(formula: &'v str) -> Result<Dice<u16>, Self::Error> {
+    fn try_from(formula: &str) -> Result<Dice<u16>, Self::Error> {
         let min_value: u16 = match formula.chars().next() {
             Some('d') => Ok(0),
             Some('D') => Ok(1),
@@ -44,7 +44,7 @@ impl <'v> TryFrom<&'v str> for Dice<u16> {
 
         let sides: u16  = formula[1..].parse::<u16>().or(Err(format!("'{}' is not a valid dice formula: Number not parsable", formula)))?;
 
-        let sides_vec = (min_value..(sides - 1 + min_value)).collect();
+        let sides_vec = (min_value..(sides + min_value)).collect(); // upper bound is exclusive
         Dice::new(sides_vec)
     }
 }
