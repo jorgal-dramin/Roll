@@ -3,6 +3,6 @@ pub trait Rollable<'v, A> {
 }
 
 pub trait NumericRollable<'v>: Rollable<'v, u16> {
-    fn max() -> u16;
-    fn min() -> u16;
+    fn max(&'v self) -> u16;
+    fn min(&'v self) -> u16;
 }

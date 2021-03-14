@@ -2,6 +2,7 @@ mod dice;
 
 use dice::Dice;
 use dice::Rollable;
+use dice::numeric_dice::NumericDice;
 use std::env;
 use std::convert::TryFrom;
 
@@ -11,7 +12,7 @@ fn main() {
 
     
 
-    match Dice::<u16>::try_from(dice_str.as_str()) {
+    match NumericDice::try_from(dice_str.as_str()) {
         Ok(mut dice) => println!("{}", dice.roll()),
         Err(msg) => println!("{}", msg)
     }
