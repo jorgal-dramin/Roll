@@ -1,5 +1,5 @@
 use super::dice::Dice;
-use super::rollable::Rollable;
+use super::rollable::{Rollable, NumericRollable};
 use std::convert::TryFrom;
 
 pub struct CompoundDice<'v> {
@@ -20,6 +20,17 @@ impl <'v> CompoundDice<'v> {
 
 impl <'v> Rollable<'v, u16> for CompoundDice<'v> {
     fn roll(&mut self) -> &u16 {
+        unimplemented!();
+    }
+}
+
+impl <'v> NumericRollable<'v> for CompoundDice<'v> {
+
+    fn max(&'v self) -> u16 {
+        unimplemented!();
+    }
+
+    fn min(&'v self) -> u16 {
         unimplemented!();
     }
 }
@@ -130,10 +141,12 @@ mod tests {
             Box::new(compound_dice_1_result.unwrap()),
             Box::new(compound_dice_2_result.unwrap()),
         ];
-        assert!(CompoundDice::new(compound_dices).is_ok());
+        let compound_dice_result = CompoundDice::new(compound_dices);
+        assert!(compound_dice_result.is_ok());
+        let mut outer_compound_dice = compound_dice_result.unwrap();
 
         for _ in (1 .. 1000) {
-            let result = compound_dices.roll();
+            let result = outer_compound_dice.roll();
             assert!(*result >= 13 && *result <= 168)
         }
     }
@@ -165,12 +178,17 @@ mod tests {
     }
 
     #[test]
-    fn try_roll_from_string_ok() {
+    fn try_all_from_string_ok() {
 
-        let compound_dices = CompoundDice::try_from("d3 + 2D23 - D6 + 12");
+        let compound_dice_result = CompoundDice::try_from("d3 + 2D23 - D6 + 12");
+        assert!(compound_dice_result.is_ok());
+        let mut compound_dice = compound_dice_result.unwrap();
+
+        assert_eq!(8, compound_dice.min());
+        assert_eq!(59, compound_dice.max());
 
         for _ in (1 .. 1000) {
-            let result = compound_dices.roll();
+            let result = compound_dice.roll();
             assert!(*result >= 8 && *result <= 59)
         }
     }
