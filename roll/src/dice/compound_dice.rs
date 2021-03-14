@@ -137,4 +137,41 @@ mod tests {
             assert!(*result >= 13 && *result <= 168)
         }
     }
+
+    #[test]
+    fn try_from_string_invalid_formulas_err() {
+        assert!(CompoundDice::try_from("formula: &str").is_err());
+        assert!(CompoundDice::try_from("W12").is_err());
+        assert!(CompoundDice::try_from("d2D3").is_err());
+        assert!(CompoundDice::try_from("0d3").is_err());
+        assert!(CompoundDice::try_from("10 d3").is_err());
+        assert!(CompoundDice::try_from("10d 3").is_err());
+        assert!(CompoundDice::try_from("").is_err());
+        assert!(CompoundDice::try_from("   ").is_err());
+        assert!(CompoundDice::try_from("d4:D3").is_err());
+    }
+
+    #[test]
+    fn try_from_string_valid_formulas_ok() {
+        assert!(CompoundDice::try_from("d3").is_ok());
+        assert!(CompoundDice::try_from("7d8").is_ok());
+        assert!(CompoundDice::try_from("4D3+3D4").is_ok());
+        assert!(CompoundDice::try_from(" 4D3 + 3D4 ").is_ok());
+        assert!(CompoundDice::try_from("3d12 + 3").is_ok());
+        assert!(CompoundDice::try_from("3d12 - 3").is_ok());
+        assert!(CompoundDice::try_from("3d12-3").is_ok());
+        assert!(CompoundDice::try_from("d3+2D23-D6").is_ok());
+        assert!(CompoundDice::try_from("d3 + 2D23 - D6+2").is_ok());
+    }
+
+    #[test]
+    fn try_roll_from_string_ok() {
+
+        let compound_dices = CompoundDice::try_from("d3 + 2D23 - D6 + 12");
+
+        for _ in (1 .. 1000) {
+            let result = compound_dices.roll();
+            assert!(*result >= 8 && *result <= 59)
+        }
+    }
 }
