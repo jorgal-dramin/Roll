@@ -2,12 +2,12 @@ use super::dice::Dice;
 use super::rollable::{Rollable, NumericRollable};
 use std::convert::TryFrom;
 
-pub struct CompoundDice<'v> {
-    rollables: Vec<Box<Rollable<'v, u16>>>,
+pub struct CompoundDice {
+    rollables: Vec<Box<Rollable<u16>>>,
 }
 
-impl <'v> CompoundDice<'v> {
-    pub fn new(rollables: Vec<Box<Rollable<'v, u16>>>) -> Result<CompoundDice, String> {
+impl <'v> CompoundDice {
+    pub fn new(rollables: Vec<Box<Rollable<u16>>>) -> Result<CompoundDice, String> {
         if rollables.is_empty() {
             Err("Not able to create compound dice that does not have rollables".to_string())
         } else {
@@ -18,27 +18,27 @@ impl <'v> CompoundDice<'v> {
     }
 }
 
-impl <'v> Rollable<'v, u16> for CompoundDice<'v> {
+impl <'v> Rollable<u16> for CompoundDice {
     fn roll(&mut self) -> &u16 {
         unimplemented!();
     }
 }
 
-impl <'v> NumericRollable<'v> for CompoundDice<'v> {
+impl NumericRollable for CompoundDice {
 
-    fn max(&'v self) -> u16 {
+    fn max(&self) -> u16 {
         unimplemented!();
     }
 
-    fn min(&'v self) -> u16 {
+    fn min(&self) -> u16 {
         unimplemented!();
     }
 }
 
-impl <'v> TryFrom<&str> for CompoundDice<'v> {
+impl <'v> TryFrom<&str> for CompoundDice {
     type Error = String;
 
-    fn try_from(formula: &str) -> Result<CompoundDice<'v>, Self::Error> {
+    fn try_from(formula: &str) -> Result<CompoundDice, Self::Error> {
         unimplemented!();
     }
 }

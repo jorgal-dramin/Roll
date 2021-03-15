@@ -26,20 +26,20 @@ impl <'v> NumericDice {
     }
 }
 
-impl <'v> Rollable<'v, u16> for NumericDice {
-    fn roll(&'v mut self) -> &u16 {
+impl <'v> Rollable<u16> for NumericDice {
+    fn roll(&mut self) -> &u16 {
         self.upside_idx = rand::thread_rng().gen_range(0..self.sides.len());
         &self.sides[self.upside_idx]
     }
 }
 
-impl <'v> NumericRollable<'v> for NumericDice {
+impl NumericRollable for NumericDice {
 
-    fn max(&'v self) -> u16 {
+    fn max(&self) -> u16 {
         unimplemented!();
     }
 
-    fn min(&'v self) -> u16 {
+    fn min(&self) -> u16 {
         unimplemented!();
     }
 }

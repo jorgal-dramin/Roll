@@ -24,8 +24,8 @@ impl <'v, A: Clone> Dice<A> {
     }
 }
 
-impl <'v, A: Clone> Rollable<'v, A> for Dice<A> {
-    fn roll(&'v mut self) -> &A {
+impl <'v, A: Clone> Rollable<A> for Dice<A> {
+    fn roll(&mut self) -> &A {
         self.upside_idx = rand::thread_rng().gen_range(0..self.sides.len());
         &self.sides[self.upside_idx]
     }
