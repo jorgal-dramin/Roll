@@ -1,13 +1,14 @@
 use super::dice::Dice;
 use super::rollable::{Rollable, NumericRollable};
 use std::convert::TryFrom;
+use std::cmp;
 
 pub struct CompoundDice {
-    rollables: Vec<Box<Rollable<u16>>>,
+    rollables: Vec<Box<NumericRollable>>,
 }
 
 impl <'v> CompoundDice {
-    pub fn new(rollables: Vec<Box<Rollable<u16>>>) -> Result<CompoundDice, String> {
+    pub fn new(rollables: Vec<Box<NumericRollable>>) -> Result<CompoundDice, String> {
         if rollables.is_empty() {
             Err("Not able to create compound dice that does not have rollables".to_string())
         } else {
@@ -27,11 +28,21 @@ impl <'v> Rollable<u16> for CompoundDice {
 impl NumericRollable for CompoundDice {
 
     fn max(&self) -> u16 {
-        unimplemented!();
+        let mut max: u16 = u16::MIN;
+
+        for rollable in self.rollables.iter() {
+            max = cmp::max(max, (*rollable).max());  // * seems wo unbox a value from a Box. I need to read this
+        }
+        max
     }
 
     fn min(&self) -> u16 {
-        unimplemented!();
+        let mut min: u16 = u16::MAX;
+
+        for rollable in self.rollables.iter() {
+            min = cmp::min(min, (*rollable).min());  // * seems wo unbox a value from a Box. I need to read this
+        }
+        min
     }
 }
 
@@ -47,48 +58,49 @@ impl <'v> TryFrom<&str> for CompoundDice {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dice::numeric_dice::NumericDice;
 
     #[test]
     fn new_no_rollable_err() {
-        let dices: Vec<Box<Rollable<u16>>> = vec![];
+        let dices: Vec<Box<NumericRollable>> = vec![];
         assert!(CompoundDice::new(dices).is_err())
     }
 
     #[test]
     fn new_with_one_rollable_ok() {
-        let dices: Vec<Box<Rollable<u16>>> = vec![Box::new(Dice::new(&(1..6).collect()).unwrap())];
+        let dices: Vec<Box<NumericRollable>> = vec![Box::new(NumericDice::new(&(1..6).collect()).unwrap())];
         assert!(CompoundDice::new(dices).is_ok())
     }
 
     #[test]
     fn new_with_multiple_rollables_ok() {
-        let dices: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(7..20).collect()).unwrap()),
+        let dices: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(7..20).collect()).unwrap()),
         ];
         assert!(CompoundDice::new(dices).is_ok())
     }
 
     #[test]
     fn new_with_nested_compound_dice_ok() {
-        let dices1: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(7..20).collect()).unwrap()),
+        let dices1: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(7..20).collect()).unwrap()),
         ];
         let compound_dice_1_result = CompoundDice::new(dices1);
         assert!(compound_dice_1_result.is_ok());
 
-        let dices2: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(3..7).collect()).unwrap()),
-            Box::new(Dice::new(&(1..100).collect()).unwrap()),
-            Box::new(Dice::new(&(0..29).collect()).unwrap()),
+        let dices2: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(3..7).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..100).collect()).unwrap()),
+            Box::new(NumericDice::new(&(0..29).collect()).unwrap()),
         ];
         let compound_dice_2_result = CompoundDice::new(dices2);
         assert!(compound_dice_2_result.is_ok());
 
-        let compound_dices: Vec<Box<Rollable<u16>>> = vec![
+        let compound_dices: Vec<Box<NumericRollable>> = vec![
             Box::new(compound_dice_1_result.unwrap()),
             Box::new(compound_dice_2_result.unwrap()),
         ];
@@ -97,7 +109,7 @@ mod tests {
 
     #[test]
     fn roll_with_one_dice() {
-        let sub_dices: Vec<Box<Rollable<u16>>> = vec![Box::new(Dice::new(&(1..6).collect()).unwrap())];
+        let sub_dices: Vec<Box<NumericRollable>> = vec![Box::new(NumericDice::new(&(1..6).collect()).unwrap())];
         let mut dice = CompoundDice::new(sub_dices).unwrap(); // unwrap is safe here; method is untder test a few lines above
         for _ in (1 .. 200) {
             let result = dice.roll();
@@ -107,10 +119,10 @@ mod tests {
 
     #[test]
     fn roll_with_three_dices() {
-        let sub_dices: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(7..20).collect()).unwrap()),
+        let sub_dices: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(7..20).collect()).unwrap()),
         ];
         let mut dice = CompoundDice::new(sub_dices).unwrap(); // unwrap is safe here; method is untder test a few lines above
         for _ in (1 .. 200) {
@@ -121,23 +133,23 @@ mod tests {
 
     #[test]
     fn roll_with_nested_compound_dice() {
-        let dices1: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(1..6).collect()).unwrap()),
-            Box::new(Dice::new(&(7..20).collect()).unwrap()),
+        let dices1: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..6).collect()).unwrap()),
+            Box::new(NumericDice::new(&(7..20).collect()).unwrap()),
         ];
         let compound_dice_1_result = CompoundDice::new(dices1);
         assert!(compound_dice_1_result.is_ok());
 
-        let dices2: Vec<Box<Rollable<u16>>> = vec![
-            Box::new(Dice::new(&(3..7).collect()).unwrap()),
-            Box::new(Dice::new(&(1..100).collect()).unwrap()),
-            Box::new(Dice::new(&(0..29).collect()).unwrap()),
+        let dices2: Vec<Box<NumericRollable>> = vec![
+            Box::new(NumericDice::new(&(3..7).collect()).unwrap()),
+            Box::new(NumericDice::new(&(1..100).collect()).unwrap()),
+            Box::new(NumericDice::new(&(0..29).collect()).unwrap()),
         ];
         let compound_dice_2_result = CompoundDice::new(dices2);
         assert!(compound_dice_2_result.is_ok());
 
-        let compound_dices: Vec<Box<Rollable<u16>>> = vec![
+        let compound_dices: Vec<Box<NumericRollable>> = vec![
             Box::new(compound_dice_1_result.unwrap()),
             Box::new(compound_dice_2_result.unwrap()),
         ];

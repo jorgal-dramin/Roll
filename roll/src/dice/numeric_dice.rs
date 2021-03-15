@@ -1,6 +1,7 @@
 use super::rollable::{Rollable, NumericRollable};
 use rand::Rng;
 use std::convert::TryFrom;
+use std::cmp;
 
 
 pub struct NumericDice {
@@ -36,11 +37,21 @@ impl <'v> Rollable<u16> for NumericDice {
 impl NumericRollable for NumericDice {
 
     fn max(&self) -> u16 {
-        unimplemented!();
+        let mut max: u16 = u16::MIN;
+
+        for side in self.sides.iter() {
+            max = cmp::max(max, *side);
+        }
+        max
     }
 
     fn min(&self) -> u16 {
-        unimplemented!();
+        let mut min: u16 = u16::MAX;
+
+        for side in self.sides.iter() {
+            min = cmp::min(min, *side);
+        }
+        min
     }
 }
 
